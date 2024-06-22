@@ -216,5 +216,5 @@ for message in st.session_state.history:
     else:
         st.markdown(f'<div class="message bot-message"><strong>Bot:</strong> {message["content"]}</div>', unsafe_allow_html=True)
 
-# Add a footer
+# Add a footer to th chatbot application
 st.markdown('<div class="footer">© 2024 Emmanuel Chibua. All rights reserved.</div>', unsafe_allow_html=True)
