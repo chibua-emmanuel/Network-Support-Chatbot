@@ -1,100 +1,185 @@
 # Network-Support-Chatbot
 
-This repository contains a Streamlit-based web application for a network support chatbot, created by Emmanuel Chibua. The chatbot is designed to assist with network-related queries, specifically focusing on Cisco and Mikrotik devices. It leverages the Llama3 language model using the Ollama API for natural language processing.
 
-## Table of Contents
-- [Network Support Chatbot](#network-support-chatbot)
-  - [Table of Contents](#table-of-contents)
-  - [Features](#features)
-  - [Installation](#installation)
-    - [Prerequisites](#prerequisites)
-    - [Setup](#setup)
-  - [Usage](#usage)
-  - [Customization](#customization)
-  - [Contributing](#contributing)
-  - [License](#license)
-  - [Acknowledgements](#acknowledgements)
+This repository contains the code for a Network Support Chatbot designed to assist users with queries related to network configurations, particularly focusing on Cisco and Mikrotik devices. The chatbot leverages the Llama3 model and the Ollama API for natural language processing.
 
 ## Features
 
-- **Expertise in Networks**: The chatbot is a subject matter expert in networks, particularly Cisco and Mikrotik devices.
-- **Interactive UI**: A user-friendly interface built with Streamlit.
-- **Real-time Chat**: Provides instant responses to user queries.
-- **Conversation History**: Displays the chat history for easy reference.
-- **Styled Interface**: Custom styling for a professional look.
+- Provides expert assistance on network-related queries.
+- Utilizes the Llama3 model fine-tuned with a focus on Cisco and Mikrotik devices.
+- Maintains a history of the conversation for context-aware responses.
+- User-friendly interface with an intuitive design.
+- Real-time interaction with both submit button and 'Enter' key functionality.
 
-## Installation
+## Demo
+
+![Demo](path/to/demo.gif)  <!-- Add a demo gif or screenshot if available -->
+
+## Getting Started
 
 ### Prerequisites
 
-- Python 3.7 or higher
-- [Streamlit](https://streamlit.io/)
-- [Ollama](https://ollama.com/)
+- Python 3.7+
+- Streamlit
+- Ollama
 
-### Setup
+### Installation
 
-1. **Clone the repository**:
+1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/network-support-chatbot.git
-    cd network-support-chatbot
+    git clone https://github.com/chibua-emmanuel/Network-Support-Chatbot.git
+    cd Network-Support-Chatbot
     ```
 
-2. **Install the required packages**:
+2. Install the required packages:
     ```sh
-    pip install streamlit ollama
+    pip install -r requirements.txt
     ```
 
-3. **Run the Streamlit app**:
-    ```sh
-    streamlit run app.py
+3. Create and fine-tune the model:
+    ```python
+    import ollama
+
+    # Define the model creation script
+    modelfile = '''
+    FROM llama3
+    SYSTEM You are a subject matter expert in networks especially Cisco and Mikrotik devices
+    '''
+
+    # Create the model
+    ollama.create(model='network_chatbot_llama', modelfile=modelfile)
     ```
 
-## Usage
+### Usage
 
-1. **Start the application**:
-    ```sh
-    streamlit run app.py
-    ```
+Run the Streamlit application:
+```sh
+streamlit run app.py
+```
 
-2. **Interact with the chatbot**:
-    - Enter your network-related query in the input box.
-    - Press `Enter` or click the `Submit` button to send your query.
-    - View the chatbot's response and the conversation history.
+### Project Structure
 
-## Customization
+```
+├── app.py                   # Main application file
+├── README.md                # Project README file
+├── requirements.txt         # Python dependencies
+```
 
-You can customize the chatbot's appearance and behavior by modifying the following sections in the `app.py` file:
+### Customization
 
-- **Model Definition**: Adjust the model creation script in the `modelfile` variable.
-- **Styling**: Update the CSS styles in the `page_style` variable.
-- **Banner and Footer**: Edit the HTML in the `st.markdown` calls for the banner and footer.
+You can customize the style and functionality by modifying the `app.py` file. The current implementation includes a custom style for the chat interface and a footer.
+
+```python
+import streamlit as st
+import ollama
+
+# Define the model creation script
+modelfile = '''
+FROM llama3
+SYSTEM You are a subject matter expert in networks especially Cisco and Mikrotik devices
+'''
+
+# Create the model (assuming the 'ollama.create' function works synchronously)
+ollama.create(model='network_chatbot_llama', modelfile=modelfile)
+
+# Custom page style
+page_style = '''
+<style>
+[data-testid="stAppViewContainer"] {
+    background-color: #f0f2f6;
+}
+
+.banner {
+    background-color: #80eede;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.footer {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px;
+    text-align: center;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.message {
+    background-color: white;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-message {
+    background-color: #d1e7dd;
+}
+
+.bot-message {
+    background-color: #f8d7da;
+}
+
+.stTextInput > div > input {
+    border: 2px solid #4a90e2;
+    border-radius: 5px;
+    padding: 5px;
+}
+</style>
+'''
+
+st.markdown(page_style, unsafe_allow_html=True)
+
+# Add a banner with your name and NU ID
+st.markdown('<div class="banner"><h2>Network Support Chatbot</h2><p>Created by Emmanuel Chibua | NU ID: 002799484</p></div>', unsafe_allow_html=True)
+
+# Initialize session state for conversation history
+if 'history' not in st.session_state:
+    st.session_state.history = []
+
+# Function to handle new user query
+def handle_query():
+    query = st.session_state.query
+    if query:
+        response = ollama.chat(model='network_chatbot_llama', messages=[
+            {
+                'role': 'user',
+                'content': query,
+            },
+        ])
+        # Update conversation history
+        st.session_state.history.append({'role': 'user', 'content': query})
+        st.session_state.history.append({'role': 'bot', 'content': response['message']['content']})
+        # Clear the input box
+        st.session_state.query = ''
+
+# Input for user query with on_change callback
+st.text_input("Ask your network-related question:", key='query', on_change=handle_query)
+
+# Display the conversation history in reverse order
+for message in reversed(st.session_state.history):
+    if message['role'] == 'user':
+        st.markdown(f'<div class="message user-message"><strong>You:</strong> {message["content"]}</div>', unsafe_allow_html=True)
+    else:
+        st.markdown(f'<div class="message bot-message"><strong>Bot:</strong> {message["content"]}</div>', unsafe_allow_html=True)
+
+# Add a footer
+st.markdown('<div class="footer">© 2024 Emmanuel Chibua. All rights reserved.</div>', unsafe_allow_html=True)
+```
 
 ## Contributing
 
-Contributions are welcome! If you have any suggestions or improvements, please open an issue or submit a pull request.
-
-1. **Fork the repository**.
-2. **Create a new branch**:
-    ```sh
-    git checkout -b feature-branch
-    ```
-3. **Make your changes**.
-4. **Commit your changes**:
-    ```sh
-    git commit -m 'Add some feature'
-    ```
-5. **Push to the branch**:
-    ```sh
-    git push origin feature-branch
-    ```
-6. **Open a pull request**.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
-## Acknowledgements
+## Contact
 
-- [Streamlit](https://streamlit.io/) for the web framework.
-- [Ollama](https://ollama.com/) for the language model API.
-- Emmanuel Chibua for creating this application.
+Emmanuel Chibua - [chibuaemmanuel@gmail.com](mailto:chibuaemmanuel@gmail.com)
+
+Project Link: [https://github.com/chibua-emmanuel/Network-Support-Chatbot](https://github.com/chibua-emmanuel/Network-Support-Chatbot)
