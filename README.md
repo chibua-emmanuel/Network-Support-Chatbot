@@ -13,7 +13,7 @@ This repository contains the code for a Network Support Chatbot designed to assi
 
 ## Demo
 
-![Demo](path/to/demo.gif)  <!-- Add a demo gif or screenshot if available -->
+![Demo](https://youtu.be/U3FLnEPlKHc)  <!-- Add a demo gif or screenshot if available -->
 
 ## Getting Started
 
