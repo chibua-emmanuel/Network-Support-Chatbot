@@ -1,135 +1,3 @@
-# import streamlit as st
-
-
-# import ollama
- 
-# # Custom page style
-
-
-# page_style = '''
-
-
-# <style>
-
-
-# [data-testid="stAppViewContainer"] {
-
-
-#     background-image: url("https://images.unsplash.com/photo-1545987796-200677ee1011?q=80&w=2970&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
-
-
-#     background-size: cover;
-
-
-#     background-repeat: no-repeat;
-
-
-#     background-attachment: fixed;
-
-
-# }
- 
-# .output-block {
-#     background-color: white;
-#     border-radius: 15px;
-#     padding: 20px;
-#     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-#     margin-top: 20px;
-# }
-
-
-# </style>
-
-
-# '''
- 
-# st.markdown(page_style, unsafe_allow_html=True)
- 
-# # Title of the app
-
-
-# st.title("Network Support Chatbot")
- 
-# # Input for user query
-
-
-# query = st.text_input("Ask your network related question:")
- 
-# # Display response if query is entered
-
-
-# if query:
-
-
-#     response = ollama.chat(model='llama3', messages=[
-
-
-#         {
-
-
-#             'role': 'user',
-
-
-#             'content': query,
-
-
-#         },
-
-
-#     ])
-
-
-#     # st.write(response['message']['content'])
-    
-#     # Display the response in a styled div
-#     st.markdown(f'<div class="output-block">{response["message"]["content"]}</div>', unsafe_allow_html=True)
-
-# import streamlit as st
-# import ollama
-
-# # Define the model creation script
-# modelfile = '''
-# FROM llama3
-# SYSTEM You are a subject matter expert in networks especially cisco and mikrotik devices
-# '''
-
-# # Create the model (assuming the 'ollama.create' function works synchronously)
-# ollama.create(model='network_chatbot_llama', modelfile=modelfile)
-
-# # Title of the app
-# st.title("Network Support Chatbot")
-
-# # Initialize session state for conversation history
-# if 'history' not in st.session_state:
-#     st.session_state.history = []
-
-# # Input for user query
-# query = st.text_input("Ask your network-related question:")
-
-# # Display response if query is entered
-# if query:
-#     response = ollama.chat(model='network_chatbot_llama', messages=[
-#         {
-#             'role': 'user',
-#             'content': query,
-#         },
-#     ])
-#     # Update conversation history
-#     st.session_state.history.append({'role': 'user', 'content': query})
-#     st.session_state.history.append({'role': 'bot', 'content': response['message']['content']})
-
-# # Display the conversation history
-# for message in st.session_state.history:
-#     if message['role'] == 'user':
-#         st.markdown(f"**You:** {message['content']}")
-#     else:
-#         st.markdown(f"**Bot:** {message['content']}")
-
-
-
-
-
-
 import streamlit as st
 import ollama
 
@@ -150,7 +18,7 @@ page_style = '''
 }
 
 .banner {
-    background-color: #4a90e2;
+    background-color: #80eede;
     color: white;
     padding: 10px;
     text-align: center;
@@ -182,6 +50,12 @@ page_style = '''
 .bot-message {
     background-color: #f8d7da;
 }
+
+.stTextInput > div > input {
+    border: 2px solid #4a90e2;
+    border-radius: 5px;
+    padding: 5px;
+}
 </style>
 '''
 
@@ -194,27 +68,35 @@ st.markdown('<div class="banner"><h2>Network Support Chatbot</h2><p>Created by E
 if 'history' not in st.session_state:
     st.session_state.history = []
 
-# Input for user query
-query = st.text_input("Ask your network-related question:")
+# Function to handle new user query
+def handle_query():
+    query = st.session_state.query
+    if query:
+        response = ollama.chat(model='network_chatbot_llama', messages=[
+            {
+                'role': 'user',
+                'content': query,
+            },
+        ])
+        # Update conversation history
+        st.session_state.history.append({'role': 'user', 'content': query})
+        st.session_state.history.append({'role': 'bot', 'content': response['message']['content']})
+        # Clear the input box
+        st.session_state.query = ''
 
-# Display response if query is entered and submit button is pressed
-if st.button("Submit"):
-    response = ollama.chat(model='network_chatbot_llama', messages=[
-        {
-            'role': 'user',
-            'content': query,
-        },
-    ])
-    # Update conversation history
-    st.session_state.history.append({'role': 'user', 'content': query})
-    st.session_state.history.append({'role': 'bot', 'content': response['message']['content']})
+# Input for user query with on_change callback
+st.text_input("Ask your network-related question:", key='query', on_change=handle_query)
 
-# Display the conversation history
-for message in st.session_state.history:
+# Display the conversation history in reverse order
+for message in reversed(st.session_state.history):
     if message['role'] == 'user':
         st.markdown(f'<div class="message user-message"><strong>You:</strong> {message["content"]}</div>', unsafe_allow_html=True)
     else:
         st.markdown(f'<div class="message bot-message"><strong>Bot:</strong> {message["content"]}</div>', unsafe_allow_html=True)
 
-# Add a footer to th chatbot application
+# Add a footer
 st.markdown('<div class="footer">© 2024 Emmanuel Chibua. All rights reserved.</div>', unsafe_allow_html=True)
+
+
+
+
